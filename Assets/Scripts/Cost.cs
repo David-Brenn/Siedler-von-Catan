@@ -1,7 +1,10 @@
 //Import System
 using System.Collections;
 using System.Collections.Generic;
-// Description: A struct to hold the cost of a card.
+
+/// <summary>
+/// A struct to hold the cost of a card.
+/// </summary>
 [System.Serializable]
 public struct Cost
 {
