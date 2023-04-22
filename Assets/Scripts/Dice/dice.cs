@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//TODO: Fix all small capps =(
 public class dice : MonoBehaviour
 {
     // Start is called before the first frame update
@@ -28,23 +29,29 @@ public class dice : MonoBehaviour
 
 
     void Start()
-    {
+    {   
+        //Calculates the opposite values
         OpposingDirectionValues = 7 * Vector3Int.one - DirectionValues;
         
         
 
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-    }
+    
+
+    /// <summary>
+    /// Wraps the throwDice function in a Coroutine so it can wait until the dice stopped moving
+    /// </summary>
     public void throwDice()
     {
         StartCoroutine(throwDiceLocal());
     }
 
-
+    /// <summary>
+    /// Throws the dice by adding force and then waits until the dice stopped moving.
+    /// Then detects the Value of the dice
+    /// </summary>
+    /// <returns></returns>
     IEnumerator throwDiceLocal(){
         Vector3 forceVector = new Vector3(Random.Range(1, 3), Random.Range(6, 7), Random.Range(1, 3));
         Vector3 torqueVector = new Vector3(Random.Range(1, 10), Random.Range(1, 10), Random.Range(1, 10));
@@ -61,10 +68,14 @@ public class dice : MonoBehaviour
         detectTopValue();
         isMoving = false;
     }
-    void detectTopValue()
+
+    /// <summary>
+    /// Detects the dice value and Stores its Value in diceValue
+    /// </summary>
+    private void detectTopValue()
     {
             if (Vector3.Cross(Vector3.up, transform.right).magnitude < 0.5f) //x axis a.b.sin theta <45
-                                                                             //if ((int) Vector3.Cross(Vector3.up, transform.right).magnitude == 0) //Previously
+                                                                             //
             {
                 if (Vector3.Dot(Vector3.up, transform.right) > 0)
                 {
