@@ -10,15 +10,18 @@ using UnityEngine;
 
 
 public class Player : MonoBehaviour
-{
+{   
+    
     public string playerName;
     public Camera playerCamera;
 
+    //Hand ref + Settings for handcard position
     public GameObject hand;
     public float handRadius;
     public float maxCircleAngle;
 
     // Player's cards 
+    //TODO: List of Cards it not right this only stores the c# script make it to GameObjects?
     public List<GameObject> handcards;
     public List<LandscapeCard> landscapeCards;
     public List<Transform> landscapeTransforms;
@@ -26,7 +29,12 @@ public class Player : MonoBehaviour
     public List<Transform> streetTransforms;
     public List<Card> cityCards;
     public List<Transform> cityTransforms;
+
+
     // Player's resources
+    public Cost resource;
+
+    //TODO: delete all of this resource and use the Cost struct instead
     public int sheep = 1;
     public int clay = 1;
     public int wood = 1;
@@ -34,10 +42,14 @@ public class Player : MonoBehaviour
     public int gold = 1;
     public int ore = 1;
 
+
     public int victoryPoints = 2;
 
+    //TODO: Move this to GameManager
     public bool checkDice = false;
-    // Start is called before the first frame update
+
+    //Add each Landscape to Possition 
+    //TODO: Maybe move this to the player preset? Therefore you don't need to the the positions
     void Start()
     {
         int i = 0;
@@ -50,7 +62,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
+    //TODO: Move the Dice Logic to the GameManager and just send its result to the player via a addResource Function()
     void Update()
     {
         if (dice.diceInstance.isMoving)
@@ -83,7 +95,7 @@ public class Player : MonoBehaviour
             }
         }
     }
-
+    //TODO: Same as before move th GameManager
     IEnumerator waitForDice()
     {
         while (dice.diceInstance.isMoving)
@@ -93,6 +105,7 @@ public class Player : MonoBehaviour
         checkDice = true;
     }
 
+    //TODO: Move to GameManager
     void eventNumberDice()
     {
         checkDice = false;
@@ -145,14 +158,22 @@ public class Player : MonoBehaviour
 
     }
 
+    //TODO
+    /// <summary>
+    /// This function enabels a building overlay where you can chose a building place. 
+    /// </summary>
     void choseBuildingPlace(){
 
     }
 
+    /// <summary>
+    /// Gets a Card from a Deck and adds it to the handcards list
+    /// </summary>
+    /// <param name="deck"></param>
     void drawCardFromDeck(GameObject deck){
         Deck deckScript = deck.GetComponent<Deck>();
         GameObject card = deckScript.drawCard();
-    //        handcards.Add(card.GetComponent<Card>());
+        //handcards.Add(card.GetComponent<Card>());
         //add card to canvas
         card.transform.SetParent(GameObject.Find("Canvas").transform);
         //q: i used git init how can i see my code on github?
@@ -160,6 +181,7 @@ public class Player : MonoBehaviour
         addCardToHand(card);
     }
 
+    //Adds a card to list and sets the position for the GameObejct as well as adjust the position of the existing card in the Hand
     void addCardToHand(GameObject card){
         handcards.Add(card);
         card.transform.SetParent(hand.transform);
@@ -171,7 +193,6 @@ public class Player : MonoBehaviour
     /// The gameobjects should be placed in a half circle around the hand gameobejct with a radius of handRadius.
     /// The cards should be placed in the order of the handcards list and are child objects of the hand gameobject.
     /// </summary>
-    
     public void placeCardAccordingToIndex(){
         //int i should be negative for the half of handcards.count, 0 for the middele and positive for the last half
         bool isOdd = handcards.Count % 2 == 1;
@@ -202,6 +223,7 @@ public class Player : MonoBehaviour
         //the circle angle should be increased for each card in handcards list but sould never be more then maxCircleAngle
     }
 
+    //TODO: use this method to display messages to the player e.g: "It's not your turn"
     void showWarning(string message){
         Debug.Log(message);
     }
