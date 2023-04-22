@@ -6,42 +6,48 @@ using UnityEngine.UI;
 using TMPro;
 
 
+/// <summary>
+/// This class is used for the card UI element. 
+/// It binds the card data to the UI Objects as well as used to trigger the animation for the cards
+/// </summary>
 [RequireComponent(typeof(Animator))]
 public class HandCardObject : MonoBehaviour
 {
+    //Contains the scriptalbe object with all the card data
     public Card card;
-   
+
+    //References to the UI objects
     public new TMP_Text name;
     public TMP_Text description; 
     public TMP_Text cost;
-
     public RawImage borderBox;
-
     public RawImage textBox;
-
     public Image Sprite;
-
     public Image TradePointSprite;
     public Image VictoryPointSprite;
 
-    
+    //Store the Color data for the TextBox
     public Color red;
     public Color green;
     public Color yellow;
 
+
+    //Defies the different Types of Colors for the Text Box
     public enum TextBoxColor {
         Red,
         Green,
         Yellow,
 
     }
+
+
     public void playCard()
     {
-        
-        
         card.playCard();
+        //TODO: should also activate a playCard animation
     }
 
+    //TODO: Card should get bigger and become first child
     public void OnHover()
     {
         

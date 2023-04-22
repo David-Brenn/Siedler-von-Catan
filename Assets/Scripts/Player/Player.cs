@@ -13,8 +13,13 @@ public class Player : MonoBehaviour
 {
     public string playerName;
     public Camera playerCamera;
+
+    public GameObject hand;
+    public float handRadius;
+    public float maxCircleAngle;
+
     // Player's cards 
-    public List<Card> handcards;
+    public List<GameObject> handcards;
     public List<LandscapeCard> landscapeCards;
     public List<Transform> landscapeTransforms;
     public List<Card> streetCards;
@@ -150,7 +155,51 @@ public class Player : MonoBehaviour
     //        handcards.Add(card.GetComponent<Card>());
         //add card to canvas
         card.transform.SetParent(GameObject.Find("Canvas").transform);
-        
+        //q: i used git init how can i see my code on github?
+        //a: use git add . and git commit -m "message" and git push
+        addCardToHand(card);
+    }
+
+    void addCardToHand(GameObject card){
+        handcards.Add(card);
+        card.transform.SetParent(hand.transform);
+        placeCardAccordingToIndex();
+    }
+
+    /// <summary>
+    /// This method is used to calculate the positions of the gameobejcts in handcards list.
+    /// The gameobjects should be placed in a half circle around the hand gameobejct with a radius of handRadius.
+    /// The cards should be placed in the order of the handcards list and are child objects of the hand gameobject.
+    /// </summary>
+    
+    public void placeCardAccordingToIndex(){
+        //int i should be negative for the half of handcards.count, 0 for the middele and positive for the last half
+        bool isOdd = handcards.Count % 2 == 1;
+        int count;
+        if (isOdd){
+            count = handcards.Count;
+        } else {
+            count = handcards.Count * 2 - 1;
+        }
+        int i = -count/2;
+        Debug.Log( "Start: " +"i: "+ i + " Count: " + count + " isOdd: " + isOdd);
+        for (int l = 0; l < handcards.Count; l++) {
+            float angle;
+            if(i % 2 == 0 && !isOdd){
+                Debug.Log("break at: " + l);
+                i ++;
+                l --;
+                continue;
+            } 
+
+            angle = i * (maxCircleAngle / count);
+            Vector3 pos = new Vector3(Mathf.Sin(angle * Mathf.Deg2Rad), Mathf.Cos(angle * Mathf.Deg2Rad), 0) * handRadius;
+            handcards[l].transform.localPosition = pos;
+            handcards[l].transform.localRotation = Quaternion.Euler(0, 0, -angle);
+            i++;
+            Debug.Log( "Whole Loop: "  + "i" + i + " Count: " + count + " isOdd: " + isOdd + " l: " + l + " angle: " + angle);
+        }
+        //the circle angle should be increased for each card in handcards list but sould never be more then maxCircleAngle
     }
 
     void showWarning(string message){
