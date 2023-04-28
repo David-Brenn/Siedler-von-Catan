@@ -847,7 +847,7 @@ GameObject:
   - component: {fileID: 602448371}
   - component: {fileID: 602448372}
   m_Layer: 0
-  m_Name: Player1
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -882,9 +882,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: David
   playerCamera: {fileID: 963194227}
-  hand: {fileID: 338867291}
-  handRadius: 70
-  maxCircleAngle: 80
   handcards: []
   landscapeCards:
   - {fileID: 466407120}
@@ -908,6 +905,13 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   cityTransforms: []
+  resource:
+    ore: 0
+    clay: 0
+    hay: 0
+    sheep: 0
+    gold: 0
+    wood: 0
   sheep: 1
   clay: 1
   wood: 1
@@ -916,6 +920,7 @@ MonoBehaviour:
   ore: 1
   victoryPoints: 2
   checkDice: 0
+  hand: {fileID: 338867291}
 --- !u!114 &602448372
 MonoBehaviour:
   m_ObjectHideFlags: 0
