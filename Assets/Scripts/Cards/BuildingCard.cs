@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ActionScripts;
 
 //make this class creatable in the unity editor
 [CreateAssetMenu(fileName = "BuildingCard", menuName = "Card/BuildingCard")]
