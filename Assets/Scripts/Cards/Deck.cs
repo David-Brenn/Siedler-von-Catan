@@ -18,7 +18,6 @@ public class Deck : MonoBehaviour
         cards.RemoveAt(0);
         GameObject handcardObejct = Instantiate(handCardObjectPrefab);
         handcardObejct.GetComponent<HandCardObject>().card = card;
-        handcardObejct.GetComponent<HandCardObject>().isDrawn();
         return handcardObejct;
     }
 

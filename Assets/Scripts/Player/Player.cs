@@ -15,10 +15,7 @@ public class Player : MonoBehaviour
     public string playerName;
     public Camera playerCamera;
 
-    //Hand ref + Settings for handcard position
-    public GameObject hand;
-    public float handRadius;
-    public float maxCircleAngle;
+
 
     // Player's cards 
     //TODO: List of Cards it not right this only stores the c# script make it to GameObjects?
@@ -48,6 +45,7 @@ public class Player : MonoBehaviour
     //TODO: Move this to GameManager
     public bool checkDice = false;
 
+    public GameObject hand;
     //Add each Landscape to Possition 
     //TODO: Maybe move this to the player preset? Therefore you don't need to the the positions
     void Start()
@@ -85,7 +83,7 @@ public class Player : MonoBehaviour
                     string tag = hit.collider.gameObject.tag;
                     if(tag == "Deck"){
                         if (GameManager.instance.currentPlayer == this){
-                            drawCardFromDeck(clickedObject);
+                            StartCoroutine(drawCardFromDeck(clickedObject));
                         } else {
                             showWarning("It's not your turn!");
                         }
@@ -170,22 +168,24 @@ public class Player : MonoBehaviour
     /// Gets a Card from a Deck and adds it to the handcards list
     /// </summary>
     /// <param name="deck"></param>
-    void drawCardFromDeck(GameObject deck){
+    IEnumerator drawCardFromDeck(GameObject deck){
         Deck deckScript = deck.GetComponent<Deck>();
+
         GameObject card = deckScript.drawCard();
+        //yield return new WaitForSeconds(2f);
         //handcards.Add(card.GetComponent<Card>());
         //add card to canvas
-        card.transform.SetParent(GameObject.Find("Canvas").transform);
         //q: i used git init how can i see my code on github?
         //a: use git add . and git commit -m "message" and git push
         addCardToHand(card);
+        yield return null;
     }
 
     //Adds a card to list and sets the position for the GameObejct as well as adjust the position of the existing card in the Hand
     void addCardToHand(GameObject card){
         handcards.Add(card);
-        card.transform.SetParent(hand.transform);
-        placeCardAccordingToIndex();
+        
+        card.GetComponent<HandCardObject>().isDrawn();
     }
 
     /// <summary>
@@ -193,35 +193,7 @@ public class Player : MonoBehaviour
     /// The gameobjects should be placed in a half circle around the hand gameobejct with a radius of handRadius.
     /// The cards should be placed in the order of the handcards list and are child objects of the hand gameobject.
     /// </summary>
-    public void placeCardAccordingToIndex(){
-        //int i should be negative for the half of handcards.count, 0 for the middele and positive for the last half
-        bool isOdd = handcards.Count % 2 == 1;
-        int count;
-        if (isOdd){
-            count = handcards.Count;
-        } else {
-            count = handcards.Count * 2 - 1;
-        }
-        int i = -count/2;
-        Debug.Log( "Start: " +"i: "+ i + " Count: " + count + " isOdd: " + isOdd);
-        for (int l = 0; l < handcards.Count; l++) {
-            float angle;
-            if(i % 2 == 0 && !isOdd){
-                Debug.Log("break at: " + l);
-                i ++;
-                l --;
-                continue;
-            } 
-
-            angle = i * (maxCircleAngle / count);
-            Vector3 pos = new Vector3(Mathf.Sin(angle * Mathf.Deg2Rad), Mathf.Cos(angle * Mathf.Deg2Rad), 0) * handRadius;
-            handcards[l].transform.localPosition = pos;
-            handcards[l].transform.localRotation = Quaternion.Euler(0, 0, -angle);
-            i++;
-            Debug.Log( "Whole Loop: "  + "i" + i + " Count: " + count + " isOdd: " + isOdd + " l: " + l + " angle: " + angle);
-        }
-        //the circle angle should be increased for each card in handcards list but sould never be more then maxCircleAngle
-    }
+    
 
     //TODO: use this method to display messages to the player e.g: "It's not your turn"
     void showWarning(string message){

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 //import textmesh Pro for unity
 using TMPro;
 
@@ -10,8 +11,7 @@ using TMPro;
 /// This class is used for the card UI element. 
 /// It binds the card data to the UI Objects as well as used to trigger the animation for the cards
 /// </summary>
-[RequireComponent(typeof(Animator))]
-public class HandCardObject : MonoBehaviour
+public class HandCardObject : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     //Contains the scriptalbe object with all the card data
     public Card card;
@@ -31,6 +31,15 @@ public class HandCardObject : MonoBehaviour
     public Color green;
     public Color yellow;
 
+
+    //For the dragging 
+    private bool isDragging = false;
+    private Vector3 startPosition;
+    private Quaternion startRotation;
+
+    //Hand ref + Settings for handcard position
+    public float handRadius;
+    public float maxCircleAngle;
 
     //Defies the different Types of Colors for the Text Box
     public enum TextBoxColor {
@@ -118,10 +127,11 @@ public class HandCardObject : MonoBehaviour
                     newImage.transform.SetSiblingIndex(TradePointSprite.transform.GetSiblingIndex());
                 }
             }else{
-                Destroy(TradePointSprite.gameObject);
+                //deactivate the TradePointSprite
+                TradePointSprite.gameObject.SetActive(false);
             }
         }else{
-            Destroy(TradePointSprite.gameObject);
+            TradePointSprite.gameObject.SetActive(false);
         }
     }
     /// <summary>
@@ -143,10 +153,11 @@ public class HandCardObject : MonoBehaviour
                     newImage.transform.SetSiblingIndex(VictoryPointSprite.transform.GetSiblingIndex());
                 }
             }else{
-                Destroy(VictoryPointSprite.gameObject);
+                VictoryPointSprite.gameObject.SetActive(false);
+
             }
         }else{
-            Destroy(VictoryPointSprite.gameObject);
+            VictoryPointSprite.gameObject.SetActive(false);
         }
     }
 
@@ -155,7 +166,117 @@ public class HandCardObject : MonoBehaviour
     /// Its triggers the DrawCard animation
     /// </summary>
     public void isDrawn(){
-        GetComponent<Animator>().SetTrigger("DrawCard");
+        GameObject hand = GameObject.Find("Hand");
+        this.transform.SetParent(hand.transform);
+        placeCardAccordingToIndex();
+        
+        startPosition = this.transform.localPosition;
+        startRotation = this.transform.localRotation;
+        Debug.Log("Start Position : "+startPosition);
+        Debug.Log("Start Rotation : "+startRotation);
 
+        
+        //set the scale to 4 
+        this.transform.localScale = new Vector3(4,4,1);
+        //set the transform to 0
+        this.transform.localPosition = new Vector3(0,400,0);
+        this.transform.rotation = Quaternion.Euler(0,0,0);
+        this.transform.localRotation = Quaternion.Euler(0,0,0);
+        
+        //use lean tween to move the card to the hand
+        LeanTween.moveLocal(this.gameObject, startPosition, 2f).setDelay(1f);
+        LeanTween.scale(this.gameObject, new Vector3(1,1,1), 2f).setDelay(1f);
+        LeanTween.rotateLocal(this.gameObject, startRotation.eulerAngles,0.01f).setDelay(3f);
+        
+        
+        
+    }
+
+    public void placeCardAccordingToIndex(){
+        //get the the handcards of the Player
+        List<GameObject> handcards = GameObject.Find("Player").GetComponent<Player>().handcards;
+        //int i should be negative for the half of handcards.count, 0 for the middele and positive for the last half
+        bool isOdd = handcards.Count % 2 == 1;
+        int count;
+        if (isOdd){
+            count = handcards.Count;
+        } else {
+            count = handcards.Count * 2 - 1;
+        }
+        int i = -count/2;
+        Debug.Log( "Start: " +"i: "+ i + " Count: " + count + " isOdd: " + isOdd);
+        for (int l = 0; l < handcards.Count; l++) {
+            float angle;
+            if(i % 2 == 0 && !isOdd){
+                Debug.Log("break at: " + l);
+                i ++;
+                l --;
+                continue;
+            } 
+
+            angle = i * (maxCircleAngle / count);
+            Vector3 pos = new Vector3(Mathf.Sin(angle * Mathf.Deg2Rad), Mathf.Cos(angle * Mathf.Deg2Rad), 0) * handRadius;
+            handcards[l].transform.localPosition = pos;
+            handcards[l].transform.localRotation = Quaternion.Euler(0, 0, -angle);
+            i++;
+            Debug.Log( "Whole Loop: "  + "i" + i + " Count: " + count + " isOdd: " + isOdd + " l: " + l + " angle: " + angle);
+        }
+        //the circle angle should be increased for each card in handcards list but sould never be more then maxCircleAngle
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if(isDragging || LeanTween.isTweening(this.gameObject)){
+            return;
+        }
+        //create a copy of this element in the center of the screen
+        GameObject cardCopy = Instantiate(this.gameObject, GameObject.Find("Canvas").transform);
+        //set the name of the copy to "OnHoverCard"
+        cardCopy.name = "OnHoverCard";
+        //scale the card copy to the size 4
+        cardCopy.transform.localScale = new Vector3(4,4,1);
+        //set the rotation of the card to 0
+        cardCopy.transform.rotation = Quaternion.Euler(0,0,0);
+        //set local position to 0
+        cardCopy.transform.localPosition = new Vector3(0,0,0);
+
+        
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        //destroy the card copy
+        Destroy(GameObject.Find("OnHoverCard"));
+        
+    }
+
+public void OnBeginDrag(PointerEventData eventData)
+    {
+        isDragging = true;
+        startPosition = transform.position;
+        startRotation = transform.rotation;
+        OnPointerExit(eventData);
+        //set Rotaiton to 0
+        this.transform.rotation = Quaternion.Euler(0,0,0);
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (isDragging)
+        {
+            Vector2 positionDelta = eventData.position - eventData.pressPosition;
+            transform.position = eventData.position;
+            
+        }
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {   
+        //TODO Raycast to objects to determine if the card is played or moved back to the hand
+        //TODO if the card is played, play the card and destroy the object
+        transform.position = startPosition;
+        transform.rotation = startRotation;
+
+        isDragging = false;
     }
 }
