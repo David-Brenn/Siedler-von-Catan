@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 939833c867d0b4de0b024e56a3aa2d3c, type: 3}
   m_Name: Aaron_der_knappe
   m_EditorClassIdentifier: 
-  name: '"Aaron der Knappe"'
+  name: Aaron der Knappe
   description: '"Ist klein"'
   prefab: {fileID: 0}
   sprite: {fileID: 0}
