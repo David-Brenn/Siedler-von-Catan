@@ -11,18 +11,15 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {   
-    
     public string playerName;
     public Camera playerCamera;
-
-
 
     // Player's cards 
     //TODO: List of Cards it not right this only stores the c# script make it to GameObjects?
     public List<GameObject> handcards;
-    public List<LandscapeCard> landscapeCards;
+    public List<GameObject> landscapeCards;
     public List<Transform> landscapeTransforms;
-    public List<Card> streetCards;
+    public List<GameObject> streetCards;
     public List<Transform> streetTransforms;
     public List<Card> cityCards;
     public List<Transform> cityTransforms;
@@ -47,15 +44,19 @@ public class Player : MonoBehaviour
 
     public GameObject hand;
     //Add each Landscape to Possition 
-    //TODO: Maybe move this to the player preset? Therefore you don't need to the the positions
+    //TODO: Maybe move this to the player preset? Therefore you don't need to set the positions
+
+    public List<GameObject> highlightedSpots = new List<GameObject>();
+
+    public GameObject highlightPrefab;
     void Start()
     {
         int i = 0;
-        foreach (LandscapeCard landscape in landscapeCards)
+        foreach (GameObject landscape in landscapeCards)
         {
-            landscape.addResource(1);
-            landscape.transform.position = landscapeTransforms[i].position;
-            i++;
+            //landscape.GetComponent<LandscapeCard>().addResource(1);
+            //landscape.transform.position = landscapeTransforms[i].position;
+            //i++;
 
         }
     }
@@ -107,18 +108,19 @@ public class Player : MonoBehaviour
     void eventNumberDice()
     {
         checkDice = false;
-        foreach (LandscapeCard landscape in landscapeCards)
+        foreach (GameObject landscape in landscapeCards)
         {
-            Debug.Log(landscape.name);
+            LandscapeCard landscapeCardComponent = landscape.GetComponent<LandscapeCard>();
+            Debug.Log(landscapeCardComponent.name);
             Debug.Log("Dice Value =" + dice.diceInstance.diceValue);
-            if (landscape.diceValue == dice.diceInstance.diceValue)
+            if (landscapeCardComponent.diceValue == dice.diceInstance.diceValue)
             {
-                int oldValue = landscape.resource;
-                landscape.addResource(1);
-                Debug.Log("Active Landscape = " + landscape.name);
-                Debug.Log("Resource Value = " + landscape.resource);
-                int difValue = landscape.resource - oldValue;
-                switch (landscape.type)
+                int oldValue = landscapeCardComponent.resource;
+                landscapeCardComponent.addResource(1);
+                Debug.Log("Active Landscape = " + landscapeCardComponent.name);
+                Debug.Log("Resource Value = " + landscapeCardComponent.resource);
+                int difValue = landscapeCardComponent.resource - oldValue;
+                switch (landscapeCardComponent.type)
                 {
                     case LandscapeTypes.hay:
                         hay = hay + difValue;
@@ -198,6 +200,59 @@ public class Player : MonoBehaviour
     //TODO: use this method to display messages to the player e.g: "It's not your turn"
     void showWarning(string message){
         Debug.Log(message);
+    }
+
+    public void addVillageCard(){
+        Debug.Log("Add Village Card");
+        openBuildingOverlay(BuildingType.VILLAGE);
+
+    }
+
+    enum BuildingType{
+        VILLAGE,
+        CITY,
+        STREET,
+        RESOURCE,
+        BUILDINGCARD
+    }
+    /// <summary>
+    /// This functions opens the building overlay where you can chose a building place. It highlights the possible building places depending on the building type. 
+    /// If the Type is VILLAGE only the places next to streets should be highlighted.
+    /// If the Type is CITY only Villages should be highlighted.
+    /// If the Type is Street only empty spots next to villages and cities should be highlighted.
+    /// If the Type is RESOURCE only the corners of the villages and cities should be highlighted.
+    /// If the Type is BUILDINGCARD only the spaces above and below villages and cities should be highlighted.
+    /// </summary>
+    /// <param name="buildingType"></param>
+    void openBuildingOverlay(BuildingType buildingType){
+
+        switch(buildingType){
+            case BuildingType.VILLAGE:
+                Debug.Log("Case Village");
+                if (streetCards[0].GetComponent<StreetCard>().leftVillage == null){
+                    Debug.Log("Left Village is null");
+                    GameObject leftStreetHighlight = Instantiate<GameObject>(highlightPrefab,streetCards[0].transform);
+                    leftStreetHighlight.transform.position = leftStreetHighlight.transform.position + new Vector3(-2.5f,0,0);
+                    highlightedSpots.Add(leftStreetHighlight);
+                } 
+                Debug.Log(streetCards.Count);
+                if(streetCards[streetCards.Count-1].GetComponent<StreetCard>().rightVillage == null){
+                    Debug.Log("Right Village is null");
+                    GameObject rightStreetHighlight = Instantiate<GameObject>(highlightPrefab,streetCards[streetCards.Count-1].transform);
+                    rightStreetHighlight.transform.position = rightStreetHighlight.transform.position + new Vector3(2.5f,0,0);
+                    highlightedSpots.Add(rightStreetHighlight);
+                }
+            break;
+            case BuildingType.CITY:
+            break;
+            case BuildingType.STREET:
+            break;
+            case BuildingType.RESOURCE:
+            break;
+            case BuildingType.BUILDINGCARD:
+            break;
+
+        }
     }
 }
 
